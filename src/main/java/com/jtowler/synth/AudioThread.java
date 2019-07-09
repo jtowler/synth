@@ -6,7 +6,7 @@ import org.lwjgl.openal.ALC;
 
 import java.util.function.Supplier;
 
-import static com.jtowler.synth.Main.AudioInfo.SAMPLE_RATE;
+import static com.jtowler.synth.SynthesizerRemastered.AudioInfo.SAMPLE_RATE;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 
