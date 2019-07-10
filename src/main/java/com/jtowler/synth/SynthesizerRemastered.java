@@ -16,7 +16,7 @@ public class SynthesizerRemastered {
     private boolean shouldGenerate;
 
     private final Oscillator[] oscillators = new Oscillator[3];
-
+    private final WaveViewer waveViewer = new WaveViewer(oscillators);
     private JFrame frame = new JFrame("Synthesizer Remastered");
     private final AudioThread audioThread = new AudioThread(() -> {
         if (!shouldGenerate) {
@@ -71,6 +71,8 @@ public class SynthesizerRemastered {
             frame.add(oscillators[i]);
             y += 105;
         }
+        waveViewer.setBounds(290, 0, 310, 310);
+        frame.add(waveViewer);
         frame.addKeyListener(keyAdapter);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -79,11 +81,15 @@ public class SynthesizerRemastered {
             }
         });
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setSize(613, 357);
+        frame.setSize(613, 345);
         frame.setResizable(false);
         frame.setLayout(null);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void updateWaveviewer() {
+        waveViewer.repaint();
     }
 
     public KeyAdapter getKeyAdapter() {
