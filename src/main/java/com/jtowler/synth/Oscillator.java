@@ -8,30 +8,25 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.Random;
-
-import static com.jtowler.synth.SynthesizerRemastered.AudioInfo.SAMPLE_RATE;
 
 public class Oscillator extends SynthControlContainer {
 
     private static final int TONE_OFFSET_LIMIT = 2000;
-
-    private final Random random = new Random();
+    private Wavetable wavetable = Wavetable.Sine;
+    private int wavetableStepSize;
+    private int wavetableIndex;
     private double keyFrequency;
-    private double frequency;
-    private int wavePos;
     private int toneOffset;
 
-    private Waveform waveform = Waveform.Sine;
 
     public Oscillator(SynthesizerRemastered synth) {
         super(synth);
-        JComboBox<Waveform> comboBox = new JComboBox<>(new Waveform[]{Waveform.Sine, Waveform.Square, Waveform.Saw, Waveform.Triangle, Waveform.Noise});
-        comboBox.setSelectedItem(Waveform.Sine);
+        JComboBox<Wavetable> comboBox = new JComboBox<>(Wavetable.values());
+        comboBox.setSelectedItem(Wavetable.Sine);
         comboBox.setBounds(10, 10, 75, 75);
         comboBox.addItemListener(l -> {
             if (l.getStateChange() == ItemEvent.SELECTED) {
-                waveform = (Waveform) l.getItem();
+                wavetable = (Wavetable) l.getItem();
             }
         });
         add(comboBox);
@@ -65,7 +60,7 @@ public class Oscillator extends SynthControlContainer {
                     applyToneOffset();
                     toneParameter.setText("x" + getToneOffset());
                 }
-                Utils.ParameterHandling.PARAMATER_ROBOT.mouseMove(mouseClickLocation.x, mouseClickLocation.y);
+                Utils.ParameterHandling.PARAMETER_ROBOT.mouseMove(mouseClickLocation.x, mouseClickLocation.y);
             }
         });
         add(toneParameter);
@@ -77,16 +72,8 @@ public class Oscillator extends SynthControlContainer {
         setLayout(null);
     }
 
-    private enum Waveform {
-        Sine, Square, Saw, Triangle, Noise
-    }
-
-    public double getKeyFrequency() {
-        return keyFrequency;
-    }
-
     public void setKeyFrequency(double frequency) {
-        keyFrequency = this.frequency = frequency;
+        keyFrequency = frequency;
         applyToneOffset();
     }
 
@@ -95,24 +82,12 @@ public class Oscillator extends SynthControlContainer {
     }
 
     public double nextSample() {
-        double tDivP = (wavePos++ / (double) SAMPLE_RATE) / (1d / frequency);
-        switch (waveform) {
-            case Sine:
-                return Math.sin(Utils.Math.frequencyToAngularFrequency(frequency) * (wavePos - 1) / SAMPLE_RATE);
-            case Square:
-                return Math.signum(Math.sin(Utils.Math.frequencyToAngularFrequency(frequency) * (wavePos - 1) / SAMPLE_RATE));
-            case Saw:
-                return 2d * (tDivP - Math.floor(0.5 + tDivP));
-            case Triangle:
-                return 2d * Math.abs(2d * (tDivP - Math.floor(0.5 + tDivP))) - 1;
-            case Noise:
-                return random.nextDouble();
-            default:
-                throw new RuntimeException("Oscillator set to unknown waveform.");
-        }
+        double sample = wavetable.getSamples()[wavetableIndex];
+        wavetableIndex = (wavetableIndex + wavetableStepSize) % Wavetable.SIZE;
+        return sample;
     }
 
-    private void applyToneOffset() {
-        frequency = keyFrequency * Math.pow(2, getToneOffset());
+    private void applyToneOffset(){
+        wavetableStepSize = (int)(Wavetable.SIZE * (keyFrequency * Math.pow(2, getToneOffset())) / SynthesizerRemastered.AudioInfo.SAMPLE_RATE);
     }
 }

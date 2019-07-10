@@ -6,7 +6,7 @@ import org.lwjgl.openal.ALC;
 
 import java.util.function.Supplier;
 
-import static com.jtowler.synth.SynthesizerRemastered.AudioInfo.SAMPLE_RATE;
+import static com.jtowler.synth.utils.Utils.handleProcedure;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 
@@ -47,7 +47,7 @@ class AudioThread extends Thread {
     public synchronized void run() {
         while (!closed) {
             while (!running) {
-                Utils.handleProcedure(this::wait, false);
+                handleProcedure(this::wait, false);
             }
             int processBuffers = alGetSourcei(source, AL_BUFFERS_PROCESSED);
             for (int i = 0; i < processBuffers; ++i) {
@@ -84,7 +84,7 @@ class AudioThread extends Thread {
 
     private void bufferSamples(short[] samples) {
         int buf = buffers[bufferIndex++];
-        alBufferData(buf, AL_FORMAT_MONO16, samples, SAMPLE_RATE);
+        alBufferData(buf, AL_FORMAT_MONO16, samples, SynthesizerRemastered.AudioInfo.SAMPLE_RATE);
         alSourceQueueBuffers(source, buf);
         bufferIndex %= BUFFER_COUNT; // 0 % 8 == 0, 8 % 8 == 0
     }

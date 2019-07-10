@@ -18,10 +18,10 @@ public class Utils {
     }
 
     public static class ParameterHandling {
-        public static final Robot PARAMATER_ROBOT;
+        public static final Robot PARAMETER_ROBOT;
         static {
             try {
-                PARAMATER_ROBOT = new Robot();
+                PARAMETER_ROBOT = new Robot();
             } catch (AWTException e) {
                 throw new ExceptionInInitializerError("Cannot construct robot instance.");
             }
